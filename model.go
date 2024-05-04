@@ -3,6 +3,7 @@ package main
 import (
 	"strings"
 
+	bcursor "github.com/charmbracelet/bubbles/cursor"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -17,10 +18,19 @@ type model struct {
 	width   int
 	height  int
 	canvas  string
+
+	cursor  bcursor.Model
+	cursorX int
+	cursorY int
 }
 
 func newModel() model {
-	return model{loading: true}
+	cursor := bcursor.New()
+	cursor.SetMode(bcursor.CursorStatic)
+	return model{
+		loading: true,
+		cursor:  cursor,
+	}
 }
 
 func (m *model) resize(w, h int) {
@@ -54,6 +64,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	}
+	m.cursor.Update(msg)
 	return m, nil
 }
 
