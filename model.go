@@ -26,7 +26,12 @@ type model struct {
 
 func newModel() model {
 	cursor := bcursor.New()
+	// cursor.TextStyle = lipgloss.NewStyle().
+	// 	Foreground(lipgloss.Color("0")).
+	// 	Background(lipgloss.Color("15"))
 	cursor.SetMode(bcursor.CursorStatic)
+	cursor.SetChar(" ")
+	cursor.Focus()
 	return model{
 		loading: true,
 		cursor:  cursor,
@@ -37,14 +42,26 @@ func (m *model) resize(w, h int) {
 	m.width = w
 	m.height = h
 
-	ch := h - 2
-	canvas := make([]string, ch)
-	for i := 0; i < ch; i++ {
-		canvas[i] = ""
-	}
-	m.canvas = strings.Join(canvas, "\n")
+	m.setCursorPos(m.cursorX, m.cursorY)
 
 	lightStatus.Width(w)
+}
+
+func (m *model) setCursorPos(x, y int) {
+	m.cursorX = x
+	m.cursorY = y
+
+	ch := m.height - 2
+	canvas := make([]string, ch)
+	for i := 0; i < ch; i++ {
+		if i == m.cursorY {
+			canvas[i] = strings.Repeat(" ", m.cursorX) +
+				m.cursor.View()
+		} else {
+			canvas[i] = ""
+		}
+	}
+	m.canvas = strings.Join(canvas, "\n")
 }
 
 func (m model) Init() tea.Cmd {
@@ -62,6 +79,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
+		case "t":
+			m.setCursorPos(12, 3)
 		}
 	}
 	m.cursor.Update(msg)
