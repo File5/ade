@@ -18,6 +18,13 @@ type canvas struct {
 	cursorY int
 }
 
+const (
+	CANVAS_DIR_UP = iota
+	CANVAS_DIR_DOWN
+	CANVAS_DIR_LEFT
+	CANVAS_DIR_RIGHT
+)
+
 func newCanvas(width, height int) canvas {
 	cursor := bcursor.New()
 	// cursor.TextStyle = lipgloss.NewStyle().
@@ -58,4 +65,21 @@ func (c *canvas) asString() string {
 
 func (c *canvas) Update(msg tea.Msg) (bcursor.Model, tea.Cmd) {
 	return c.cursor.Update(msg)
+}
+
+func (c *canvas) MoveCursor(count int, dir int) {
+	x, y := c.cursorX, c.cursorY
+	switch dir {
+	case CANVAS_DIR_UP:
+		y = max(0, y-count)
+	case CANVAS_DIR_DOWN:
+		y = min(y+count, c.height)
+	case CANVAS_DIR_LEFT:
+		x = max(0, x-count)
+	case CANVAS_DIR_RIGHT:
+		x = min(x+count, c.width)
+	}
+	if x != c.cursorX || y != c.cursorY {
+		c.setCursorPos(x, y)
+	}
 }

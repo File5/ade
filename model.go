@@ -50,6 +50,14 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		case "t":
 			m.canvas.setCursorPos(12, 3)
+		case "up", "k":
+			m.canvas.MoveCursor(1, CANVAS_DIR_UP)
+		case "down", "j":
+			m.canvas.MoveCursor(1, CANVAS_DIR_DOWN)
+		case "left", "h":
+			m.canvas.MoveCursor(1, CANVAS_DIR_LEFT)
+		case "right", "l":
+			m.canvas.MoveCursor(1, CANVAS_DIR_RIGHT)
 		}
 	}
 	m.canvas.Update(msg)
