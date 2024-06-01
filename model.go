@@ -15,13 +15,16 @@ type model struct {
 	width   int
 	height  int
 
-	canvas canvas
+	controller controller
+	canvas     canvas
 }
 
 func newModel() model {
-	return model{
+	m := model{
 		loading: true,
 	}
+	m.controller = newController()
+	return m
 }
 
 func (m *model) resize(w, h int) {
@@ -31,6 +34,10 @@ func (m *model) resize(w, h int) {
 	m.canvas = newCanvas(w, h)
 
 	lightStatus.Width(w)
+}
+
+func (m *model) MoveCursor(count int, dir direction) {
+	m.canvas.MoveCursor(count, dir)
 }
 
 func (m model) Init() tea.Cmd {
@@ -48,16 +55,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "ctrl+c", "q":
 			return m, tea.Quit
-		case "t":
-			m.canvas.setCursorPos(12, 3)
-		case "up", "k":
-			m.canvas.MoveCursor(1, CANVAS_DIR_UP)
-		case "down", "j":
-			m.canvas.MoveCursor(1, CANVAS_DIR_DOWN)
-		case "left", "h":
-			m.canvas.MoveCursor(1, CANVAS_DIR_LEFT)
-		case "right", "l":
-			m.canvas.MoveCursor(1, CANVAS_DIR_RIGHT)
+		default:
+			m.controller.Handle(msg, &m)
 		}
 	}
 	m.canvas.Update(msg)
